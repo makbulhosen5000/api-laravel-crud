@@ -79,18 +79,6 @@ class CategoryController extends Controller
         ],404);
       
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
     /**
      * Update the specified resource in storage.
      *
@@ -100,7 +88,36 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $category = Category::find($id);
+         if(!$category){
+              return response()->json([
+             'success'=>false,
+             'message'=>'Category Not Found',
+             'data'=>[]
+          ]);
+        }
+        
+           $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:categories,name'.$category->$id,
+        ]);
+
+       if($validator->fails()){
+        return response()->json([
+            'success'=>false,
+            'message'=>'error',
+            'errors'=>$validator->getMessageBag(),
+        ]);
+       }
+       $fromData = $validator->validated();
+       $fromData['slug'] = Str::slug($fromData['name']);
+       $category->update($fromData);
+
+       return response()->json([
+        'success'=>true,
+        'message' => 'Category Update Successfully',
+        'data' =>[]
+       ]);
+
     }
 
     /**
@@ -111,6 +128,19 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $category = Category::find($id);
+         if(!$category){
+              return response()->json([
+             'success'=>false,
+             'message'=>'Category Not Found',
+             'data'=>[]
+          ],404);
+        }
+        $category->delete();
+         return response()->json([
+             'success'=>true,
+             'message'=>'Category Deleted Successfully',
+             'data'=>[]
+          ],404);
     }
 }
