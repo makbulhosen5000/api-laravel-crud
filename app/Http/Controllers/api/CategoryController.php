@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -44,8 +45,15 @@ class CategoryController extends Controller
             'errors'=>$validator->getMessageBag(),
         ]);
        }
+       $fromData = $validator->validated();
+       $fromData['slug'] = Str::slug($fromData['name']);
+       $category=Category::create($fromData);
 
-       return response()->json($validator->validated());
+       return response()->json([
+        'success'=>true,
+        'message' => 'Category Created Successfully',
+        'data' =>$category
+       ]);
     }
 
     /**
@@ -56,7 +64,20 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        //
+        $category = Category::find($id);
+        if($category){
+              return response()->json([
+             'success'=>true,
+             'message'=>'successfully',
+             'data'=>$category
+          ]);
+        }
+        return response()->json([
+            'success'=>false,
+            'message'=>'error',
+            'errors'=>'Category Not Found!',
+        ],404);
+      
     }
 
     /**
